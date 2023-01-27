@@ -105,13 +105,14 @@ def find_in_pdf(files,strings):
                         zoom_mat = fitz.Matrix(2, 2)
                         pix = page.get_pixmap(matrix=zoom_mat)  
                     try:
+
                         pix.save(os.path.join("./IMG",file.rsplit('.', 1)[0] + '.jpg'))
                     except:
                         print_status("não foi possível salvar "+str(os.path.join("./IMG",file.rsplit('.', 1)[0] + '.jpg')))
             doc.close()
-            print(str(text_instances))
+            print_status()
         except:
-            
+            print_status("Não foi possível abrir aquivo "+file)
         
     # return list of pdf with found string
     return found_files_list
