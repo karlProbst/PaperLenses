@@ -1,11 +1,10 @@
-#tkinter Busca pdf - Karl Probst - 1/18/2023 - v1.1 - Orange Business Services 
+#tkinter Busca pdf - Karl Probst - 1/26/2023 - v1.2 - Orange Business Services 
 
 #TO DO:
 
-#SCROLLBARS!!
-# highlighter
+
+
 # status bar
-# blink when correct
 # greyed out found list when nothing is there
 # images miniatures
 # image viewer on side
@@ -15,7 +14,12 @@
 # add page indication wehre found
 # add font change button
 # night mode
-
+# save all found files to a specified folder
+# save images to memory
+# processing gif
+# 
+# preview on click
+# Pdf viewer controls 
 
 import os.path
 from os import path
@@ -46,7 +50,9 @@ else:
     filename = file_buscas_salvas
     with open(file_buscas_salvas, 'w') as f:
         f.write("")
-
+# status bar
+def print_status(string):
+    pass
 # Open directory
 def chose_folder(): 
     global pdf_folder
@@ -77,22 +83,35 @@ def find_in_pdf(files,strings):
         try:
             doc = fitz.open(os.path.join(pdf_folder,file))
             matches = []
-        
+            text_instances = []
 
             for page in doc:  
                 # actual search 
                 for s in strings:
                     # add found word to list
-                    if len(page.search_for(s))>0:
+                    temp_search=page.search_for(s)
+                    if len(temp_search)>0:
                         matches.append(s)
-                        
+                        text_instances.append(temp_search)      
             # if list has all of strings keywords
             if(all(item in matches for item in strings)):
                 #found file
                 found_files_list.append(file)
+                #save image with highlighter
+                for page in doc:
+                    for inst in text_instances:
+                   
+                        highlight = page.add_highlight_annot(inst)
+                        zoom_mat = fitz.Matrix(2, 2)
+                        pix = page.get_pixmap(matrix=zoom_mat)  
+                    try:
+                        pix.save(os.path.join("./IMG",file.rsplit('.', 1)[0] + '.jpg'))
+                    except:
+                        print_status("não foi possível salvar "+str(os.path.join("./IMG",file.rsplit('.', 1)[0] + '.jpg')))
             doc.close()
+            print(str(text_instances))
         except:
-            pass
+            
         
     # return list of pdf with found string
     return found_files_list
@@ -109,20 +128,18 @@ except:
 
 root.option_add("*Font", "Calibri 12 ")
 root.option_add("*Background", "white")
-root.option_add("*Foreground", "white")
-
+root.option_add("*Foreground", "blue")
+root.option_add("sel", "red")
 root.option_add("relief","SUNKEN")
-
+rel_var="flat"
+button_color="#5B5B5B"
+text_color="black"
+button_foreground_color="white"
 root.title("Busca PDF")
 root.geometry("720x480")
 
 
-n_rows = 5
-n_columns =4
-
-for i in range(n_columns):
-    root.grid_columnconfigure(i,  weight =1)
-    
+  
     
 # input
 busca_input_string = tk.StringVar()
@@ -133,57 +150,65 @@ def clear_busca_input_on_click():
     if busca_input.get() == "Palavra chave que deseja pesquisar":
         busca_input.delete('0', 'end')
 
-rel_var="flat"
-button_color="#5B5B5B"
-text_color="black"
+
 #frames
 buscas_salvas_frame = tk.Frame(root)
 pdf_list_frame = tk.Frame(root)
+found_pdf_list_frame = tk.Frame(root)
 buscas_salvas_frame.grid_columnconfigure(0,  weight = 10)
+pdf_list_frame.grid_columnconfigure(0,  weight = 10)
+found_pdf_list_frame.grid_columnconfigure(0,  weight = 10)
 # widgets
-dir_btn = tk.Button(root, text ='Escolha o diretório contendo os PDFs', command = lambda:chose_folder(),bd=3,relief=rel_var,background=button_color) 
+dir_btn = tk.Button(root, text ='Escolha o diretório contendo os PDFs', command = lambda:chose_folder(),bd=3,relief=rel_var,background=button_color,foreground=button_foreground_color) 
 busca_input = tk.Entry(root, text=busca_input_string,bd=2,highlightthickness = 2, relief=rel_var,foreground=text_color)
 #buscas_salvas_label = tk.Label(root, text='Buscas recentes: ',bd=0)
+
+#scrollbars
 buscas_salvas_scrollbar = tk.Scrollbar(buscas_salvas_frame, orient="vertical",relief=rel_var)
 pdf_list_scrollbar = tk.Scrollbar(pdf_list_frame, orient="vertical",relief=rel_var)
-buscas_salvas_inp = tk.Listbox(buscas_salvas_frame,height = 3,yscrollcommand=buscas_salvas_scrollbar.set, relief=rel_var,foreground=text_color)
-save_btn = tk.Button(root,text="Buscar!",relief=rel_var,background=button_color)
-pdf_list = tk.Listbox(root,height=30,yscrollcommand=pdf_list_scrollbar.set, relief=rel_var,foreground=text_color)
+found_pdf_list_scrollbar = tk.Scrollbar(found_pdf_list_frame, orient="vertical",relief=rel_var)
+
+buscas_salvas_list = tk.Listbox(buscas_salvas_frame,height = 3,yscrollcommand=buscas_salvas_scrollbar.set, relief=rel_var,foreground=text_color)
+save_btn = tk.Button(root,text="Buscar!",relief=rel_var,background=button_color,foreground=button_foreground_color)
+pdf_list = tk.Listbox(pdf_list_frame,height=30,yscrollcommand=pdf_list_scrollbar.set, relief=rel_var,foreground=text_color)
 found_pdf_label = tk.Label(root, text='Encontrados na busca: ',foreground=text_color)
-found_pdf_list = tk.Listbox(root,height=30 ,foreground=text_color)
+found_pdf_list = tk.Listbox(found_pdf_list_frame,yscrollcommand=found_pdf_list_scrollbar.set, relief=rel_var,height=30 ,foreground=text_color)
 # placing in grid
 
-found_pdf_label.grid(row=4,column=1, sticky='nsew', padx=5, pady=5)
-
-found_pdf_list.grid(row=5,column=1, sticky='nsew', ipadx=25,padx=5, pady=5)
+found_pdf_label.grid(row=4,column=2, sticky='nsew', padx=5, pady=5)
+found_pdf_list.grid(row=6,column=2, sticky='nsew' ,padx=5, pady=5)
 dir_btn.grid(row=0, column=0, padx=5, pady=5,sticky='nsew')
 busca_input.grid(row=1,column=0, sticky='nsew', padx=5, pady=5)
 #buscas_salvas_label.grid(row=2,column=0, sticky='nsew', padx=5, pady=0)
-buscas_salvas_inp.grid(row=3,column=0, sticky='nsew', padx=5, pady=5)
+buscas_salvas_list.grid(row=3,column=0, sticky='nsew', padx=5, pady=5)
 buscas_salvas_scrollbar.grid(row=3,column=1,sticky='nsew',)
-
+pdf_list_scrollbar.grid(row=6,column=2,sticky='nsew',)
+found_pdf_list_scrollbar.grid(row=6,column=3,sticky='nsew',)
 buscas_salvas_frame.grid(row=3,column=0, sticky='nsew', padx=5, pady=5)
-pdf_list_scrollbar.grid(row=5,column=1,sticky='nsew')
+pdf_list_scrollbar.grid(row=6,column=1,sticky='nsew')
 save_btn.grid(row=4,column=0, sticky='nsew', ipadx=5, ipady=5,padx=5, pady=5)
-pdf_list.grid(row=5,column=0, sticky='nsew', padx=5, pady=5)
+pdf_list.grid(row=6,column=0, sticky='nsew', padx=5, pady=5)
+pdf_list_frame.grid(row=6,column=0, sticky='nsew', padx=5, pady=5)
+found_pdf_list_frame.grid(row=6,column=2, sticky='nsew', padx=5, pady=5)
 # configs
 busca_input.bind("<FocusIn>", lambda args:clear_busca_input_on_click())
-buscas_salvas_scrollbar.config(command=buscas_salvas_inp.yview)
-
+buscas_salvas_scrollbar.config(command=buscas_salvas_list.yview)
+pdf_list_scrollbar.config(command=pdf_list.yview)
+found_pdf_list_scrollbar.config(command=found_pdf_list.yview)
 def update_buscas_salvas(string):
     global buscas_salvas
     #clear
     try:
-        buscas_salvas_inp.delete(0,tk.END)    
+        buscas_salvas_list.delete(0,tk.END)    
         #insert into buscas_salvas
         if string!="":
-            if len(buscas_salvas)>20:
+            if len(buscas_salvas)>50:
                 buscas_salvas.insert(0, string)
                 buscas_salvas.pop()
             else:
                 buscas_salvas.insert(0, string)
         #insert into listbox
-        buscas_salvas_inp.insert(tk.END, *buscas_salvas)
+        buscas_salvas_list.insert(tk.END, *buscas_salvas)
     except:
         pass
 print(buscas_salvas)
@@ -197,7 +222,7 @@ def callback_buscas_salvas(event):
         busca_input_string.set(data)
    
         
-buscas_salvas_inp.bind("<<ListboxSelect>>", callback_buscas_salvas)
+buscas_salvas_list.bind("<<ListboxSelect>>", callback_buscas_salvas)
 
 #data_folder = Path("D:/")
 #file_to_open = data_folder / "pgmt_passaporte.pdf"
@@ -210,6 +235,7 @@ def open_file(pdf_folder,data):
         subprocess.call(["xdg-open", os.path.join(pdf_folder,data)])
     except:
         #windows
+        find_in_pdf(pdfs,search_strings)
         subprocess.Popen([os.path.join(pdf_folder,data)], shell=True)
 # list of pdfs in folder
 def callback_pdf_list(event):
