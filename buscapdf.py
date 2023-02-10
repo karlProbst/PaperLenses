@@ -74,7 +74,19 @@ if not path.exists(img_path):
 def print_status(string):
     pass
 # Open directory
-
+def chose_docx():
+    file =filedialog.askopenfilename(defaultextension=".pdf",filetypes=(("DOCX File","*.docx"),("all files","*.*")))
+    try:
+        
+        if file.endswith('.docx'):
+            print(str(os.path.join(pdf_path,os.path.splitext(file)[0]+'.pdf')))
+            try:
+                convert(file, os.path.join(pdf_path,os.path.splitext(file)[0]+'.pdf'))
+            except:
+                pass
+    except Exception as e:
+        print(e)
+    update_pdf_list()
 def chose_folder(): 
     global pdf_path
     global loading_bar
@@ -91,16 +103,7 @@ def chose_folder():
     
 
     # get .pdf files from dir
-    try:
-        for file in os.listdir(folder):
-            if file.endswith(".docx"):
-                print(str(os.path.join(pdf_path,os.path.splitext(file)[0]+'.pdf')))
-                try:
-                    convert(file, os.path.join(pdf_path,os.path.splitext(file)[0]+'.pdf'))
-                except:
-                    pass
-    except Exception as e:
-        print(e)
+    
     for file in os.listdir(folder):
         if file.endswith(".pdf"):
             print(file)
@@ -211,7 +214,7 @@ root.option_add("*Foreground", "blue")
 root.option_add("sel", "red")
 root.option_add("relief","SUNKEN")
 
-root.setWindowIcon(QtGui.QIcon('QRev.ico'))
+
 rel_var="flat"
 button_color="#5B5B5B"
 text_color="black"
@@ -243,7 +246,8 @@ pdf_list_frame.grid_columnconfigure(0,  weight = 10)
 found_pdf_list_frame.grid_columnconfigure(0,  weight = 10)
 image_frame.grid_columnconfigure(0,  weight = 1)
 # widgets
-dir_btn = tk.Button(root, text ='1.Escolha diretórios contendo .docx ou .pdf', command = lambda:chose_folder(),bd=3,relief=rel_var,background=button_color,foreground=button_foreground_color) 
+dir_btn = tk.Button(root, text ='1.Escolha diretórios contendo .pdf', command = lambda:chose_folder(),bd=3,relief=rel_var,background=button_color,foreground=button_foreground_color) 
+docx_btn = tk.Button(root, text ='1. Escolha um .docx', command = lambda:chose_docx(),bd=3,relief=rel_var,background=button_color,foreground=button_foreground_color) 
 next_img_btn = tk.Button(root, text ='Página anterior<<', command = lambda:prev_img(),bd=3,relief=rel_var,background=button_color,foreground=button_foreground_color) 
 prev_img_btn= tk.Button(root, text ='>>Próxima página', command = lambda:next_img(),bd=3,relief=rel_var,background=button_color,foreground=button_foreground_color) 
 busca_input = tk.Entry(root, text=busca_input_string,bd=2,highlightthickness = 2, relief=rel_var,foreground=text_color)
@@ -267,25 +271,27 @@ found_pdf_list = tk.Listbox(found_pdf_list_frame,yscrollcommand=found_pdf_list_s
 img_preview_label = tk.Label(image=my_img)
 # placing in grid
 
-img_preview_label.grid(row=2,column=4, sticky='nsew',rowspan=5 , padx=5, pady=5,columnspan=3,)
-found_pdf_label.grid(row=4,column=2, sticky='nsew', padx=5, pady=5)
-found_pdf_list.grid(row=6,column=2, sticky='nsew' ,padx=5, pady=5)
-dir_btn.grid(row=0, column=0, padx=5, pady=5,sticky='nsew')
-next_img_btn.grid(row=1, column=4, padx=30, pady=5,sticky='nsew')
-prev_img_btn.grid(row=1, column=5, padx=30, pady=5,sticky='nsew')
+img_preview_label.grid(row=3,column=4, sticky='nsew',rowspan=5 , padx=5, pady=5,columnspan=3,)
+found_pdf_label.grid(row=5,column=2, sticky='nsew', padx=5, pady=5)
+found_pdf_list.grid(row=7,column=2, sticky='nsew' ,padx=5, pady=5)
+dir_btn.grid(row=1, column=0, padx=5, pady=5,sticky='nsew')
+docx_btn.grid(row=0, column=0, padx=5, pady=5,sticky='nsew')
 
-busca_input.grid(row=1,column=0, sticky='nsew', padx=5, pady=5)
+next_img_btn.grid(row=2, column=4, padx=30, pady=5,sticky='nsew')
+prev_img_btn.grid(row=2, column=5, padx=30, pady=5,sticky='nsew')
+
+busca_input.grid(row=2,column=0, sticky='nsew', padx=5, pady=5)
 #buscas_salvas_label.grid(row=2,column=0, sticky='nsew', padx=5, pady=0)
-buscas_salvas_list.grid(row=3,column=0, sticky='nsew', padx=5, pady=5)
-buscas_salvas_scrollbar.grid(row=3,column=1,sticky='nsew',)
-pdf_list_scrollbar.grid(row=6,column=2,sticky='nsew',)
-found_pdf_list_scrollbar.grid(row=6,column=3,sticky='nsew',)
-buscas_salvas_frame.grid(row=3,column=0, sticky='nsew', padx=5, pady=5)
-pdf_list_scrollbar.grid(row=6,column=1,sticky='nsew')
-search_btn.grid(row=4,column=0, sticky='nsew', ipadx=5, ipady=5,padx=5, pady=5)
-pdf_list.grid(row=6,column=0, sticky='nsew', padx=5, pady=5)
-pdf_list_frame.grid(row=6,column=0, sticky='nsew', padx=5, pady=5)
-found_pdf_list_frame.grid(row=6,column=2, sticky='nsew', padx=5, pady=5)
+buscas_salvas_list.grid(row=4,column=0, sticky='nsew', padx=5, pady=5)
+buscas_salvas_scrollbar.grid(row=4,column=1,sticky='nsew',)
+pdf_list_scrollbar.grid(row=7,column=2,sticky='nsew',)
+found_pdf_list_scrollbar.grid(row=7,column=3,sticky='nsew',)
+buscas_salvas_frame.grid(row=4,column=0, sticky='nsew', padx=5, pady=5)
+pdf_list_scrollbar.grid(row=7,column=1,sticky='nsew')
+search_btn.grid(row=5,column=0, sticky='nsew', ipadx=5, ipady=5,padx=5, pady=5)
+pdf_list.grid(row=7,column=0, sticky='nsew', padx=5, pady=5)
+pdf_list_frame.grid(row=7,column=0, sticky='nsew', padx=5, pady=5)
+found_pdf_list_frame.grid(row=7,column=2, sticky='nsew', padx=5, pady=5)
 
 #  configs
 busca_input.bind("<FocusIn>", lambda args:clear_busca_input_on_click())
@@ -508,4 +514,3 @@ def exit_handler():
 atexit.register(exit_handler)
 search_btn.configure(command=Buscar)
 root.mainloop()
-update_pdf_list() 
