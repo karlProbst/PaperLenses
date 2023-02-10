@@ -141,7 +141,7 @@ def find_in_pdf(files,strings,save_img):
                         for inst in text_instances:
                             
                             highlight = page.add_highlight_annot(inst)
-                            zoom_mat = fitz.Matrix(1, 1)
+                            zoom_mat = fitz.Matrix(2, 2)
                             pix = page.get_pixmap(matrix=zoom_mat)  
                             
                         try:
@@ -150,8 +150,8 @@ def find_in_pdf(files,strings,save_img):
                             current_img.append(temp_img_path)
                             pix.save(temp_img_path)
                             img = ImageTk.PhotoImage(Image.open(current_img[0]).resize((int(WIDTH/2), HEIGHT), Image.ANTIALIAS))
-                            image_label.configure(image=img)
-                            image_label.image = img
+                            img_preview_label.configure(image=img)
+                            img_preview_label.image = img
                         except:
                             print_status("não foi possível salvar "+temp_img_path)
                 
@@ -172,6 +172,10 @@ def find_in_pdf(files,strings,save_img):
     # return list of pdf with found string
     return found_files_list
 
+
+
+    
+# Change pages 
 def next_img():
     global current_img
     global current_img_counter
@@ -180,8 +184,8 @@ def next_img():
     current_img_counter+=1
     
     img = ImageTk.PhotoImage(Image.open(current_img[current_img_counter]).resize((int(WIDTH/2), HEIGHT), Image.ANTIALIAS))
-    image_label.configure(image=img)
-    image_label.image = img
+    img_preview_label.configure(image=img)
+    img_preview_label.image = img
 def prev_img():
     global current_img
     global current_img_counter
@@ -190,8 +194,8 @@ def prev_img():
     current_img_counter-=1
    
     img = ImageTk.PhotoImage(Image.open(current_img[current_img_counter]).resize((int(WIDTH/2), HEIGHT), Image.ANTIALIAS))
-    image_label.configure(image=img)
-    image_label.image = img
+    img_preview_label.configure(image=img)
+    img_preview_label.image = img
 
 # GUI
 root = tk.Tk()
@@ -206,11 +210,13 @@ root.option_add("*Background", "white")
 root.option_add("*Foreground", "blue")
 root.option_add("sel", "red")
 root.option_add("relief","SUNKEN")
+
+root.setWindowIcon(QtGui.QIcon('QRev.ico'))
 rel_var="flat"
 button_color="#5B5B5B"
 text_color="black"
 button_foreground_color="white"
-root.title("Busca PDF")
+root.title("Paper Lenses V0.9")
 root.geometry("900x700")
 
 
@@ -258,10 +264,10 @@ found_pdf_list = tk.Listbox(found_pdf_list_frame,yscrollcommand=found_pdf_list_s
 #image
 
 
-image_label = tk.Label(image=my_img)
+img_preview_label = tk.Label(image=my_img)
 # placing in grid
 
-image_label.grid(row=2,column=4, sticky='nsew',rowspan=5 , padx=5, pady=5,columnspan=3,)
+img_preview_label.grid(row=2,column=4, sticky='nsew',rowspan=5 , padx=5, pady=5,columnspan=3,)
 found_pdf_label.grid(row=4,column=2, sticky='nsew', padx=5, pady=5)
 found_pdf_list.grid(row=6,column=2, sticky='nsew' ,padx=5, pady=5)
 dir_btn.grid(row=0, column=0, padx=5, pady=5,sticky='nsew')
@@ -313,7 +319,7 @@ def callback_buscas_salvas(event):
         busca_input_string.set(data)
    
         
-buscas_salvas_list.bind("<<ListboxSelect>>", callback_buscas_salvas)
+
 
 #data_folder = Path("D:/")
 #file_to_open = data_folder / "pgmt_passaporte.pdf"
@@ -342,7 +348,7 @@ def callback_pdf_list(event):
 
 
 
-pdf_list.bind("<<ListboxSelect>>", callback_pdf_list)
+
 # update list of pdfs
 def update_pdf_list():
     try:
@@ -381,12 +387,19 @@ def callback_found_pdf_list(event):
         files.append(data)
         find_in_pdf(files,search_strings,True)
   
-        #open_file(pdf_path,data)
-
-
-
+#open image externally on click
+def callback_image_open(event):
+    global current_img
+    global current_img_counter
+    print(str(current_img[current_img_counter]))
+    os.startfile(str(current_img[current_img_counter]))
+#on click do:
+buscas_salvas_list.bind("<<ListboxSelect>>", callback_buscas_salvas)
+pdf_list.bind("<<ListboxSelect>>", callback_pdf_list)
 found_pdf_list.bind("<<ListboxSelect>>", callback_found_pdf_list)
-
+found_pdf_list.bind("<<ListboxSelect>>", callback_found_pdf_list)
+img_preview_label.bind('<Button-1>', callback_image_open)
+#
 def update_found_pdf_list(list):
     try:
         found_pdf_list.delete(0,tk.END)
@@ -404,15 +417,9 @@ def Buscar():
     global pdf_path
     
     global search_strings
-    # buscar btn
     # validation checks
-    
-   
-    print(type(search_strings))
-    
     # split by comma into a list 
     search_strings = busca_input.get().split(',')
-    print(search_strings)
     if "2. Palavras chave (separe com ,)" in search_strings:
         return
     # remove empty strings
@@ -421,7 +428,6 @@ def Buscar():
     for s in range(len(search_strings)):
        search_strings[s] = search_strings[s].rstrip()
        search_strings[s] = search_strings[s].lstrip()
-    print(search_strings)
     # returns if nothing is found on input
     if len(search_strings)<1:
         return
