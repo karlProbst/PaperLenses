@@ -1,2 +1,2 @@
-# BuscaPDF
-busca de palavras chave em pdf
+# Paper Lenses
+busca de palavras chave em .pdf e .docx
