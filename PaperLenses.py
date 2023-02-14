@@ -10,7 +10,11 @@
 # add font change button
 # night mode
 # Help page
-
+# tirar o 1,2,3,4
+# fonte bold
+# tudo em inglês
+# pasta ao invez de arquivos
+# nightmode
 import time
 import glob
 import shutil
@@ -113,9 +117,9 @@ def save_found():
             if file.endswith('.pdf'):
                 shutil.copy(os.path.join(pdf_path,file), folder)
 
-            print_status("Foram salvos "+str(counter)+" arquivos na pasta "+str(folder))    
+            print_status(""+str(counter)+" files where saved to "+str(folder))    
     except:
-        print_status("Não foi possível salvar.")
+        print_status("It was not possible to save.")
 def chose_folder(): 
     global pdf_path
     global doc_path
@@ -123,31 +127,31 @@ def chose_folder():
     files = []
     # open browser dialog to select dir
     try:
-        files = filedialog.askopenfilenames()
+        folder = filedialog.askdirectory()
     except:
         pass
     if files is None: 
         return
     counter=0
-    print_status("Importando documentos...")
+    print_status("Importing documents...")
     
     # get .pdf files from dir   
-    for file in files:
+    for file in os.listdir(folder):
         if file.endswith(".pdf"):
-            shutil.copy(file, pdf_path) 
+            shutil.copy(os.path.join(folder,file), pdf_path)
             counter+=1
-            print_status("Importando documentos...")
+           
     # get .docx files from dir   
-    for file in files:
+    for file in os.listdir(folder):
         if file.endswith(".docx"):
             print(file)
-            shutil.copy(file, docx_path)
-            print_status("Importando documentos...")
+            shutil.copy(os.path.join(folder,file), docx_path)
+          
             counter+=1
     if(counter>1):
-        print_status("Foram importados "+str(counter)+" arquivos, digite um filtro e procure.")
+        print_status(""+str(counter)+" documents where imported, type a filter and search!\n You can search for multiple words at the same time with a comma(,)")
     else:
-        print_status("1 documento foi importado! Digite um filtro e procure.")
+        print_status("1 document was imported, type a filter and search!\n You can search for multiple words at the same time with a comma ,")
     update_documents_list()
     
 print(doc_path)
@@ -181,7 +185,7 @@ def find_in_pdf(files,strings):
         #PDF SEARCH
         if file.endswith('.pdf'):
             try:
-                print_status("processando "+file)
+                print_status("Processing "+file)
                 doc = fitz.open(os.path.join(pdf_path,file))  
                 
                 for page in doc:  
@@ -198,23 +202,23 @@ def find_in_pdf(files,strings):
                 doc.close()
       
             except:
-                print_status("Não foi possível abrir aquivo "+file)
+                print_status("It was not possible to open "+file)
 
         # if list has all of strings keywords
         if all(item in matches for item in strings):
             #found file 
-            print_status("Match em "+file)
+            print_status("Match in "+file)
             found_files_list.append(file) 
             
     # return list of pdf with found string
     
     flen=len(found_files_list)
     if flen == 0:
-        print_status(str(busca_input.get())+" Não foi encontrado nos arquivos importados.")
+        print_status(str(busca_input.get())+" Was not found on the imported documents.")
     elif flen == 1:
-        print_status("Econtrado no documento\n "+str(firstfile[0:60])+" \nlistado à direita. Clique nele para abrir.")
+        print_status("Found in document\n "+str(firstfile[0:60])+" \nListed on the right. Click on each item on the list to open the document.")
     else:
-        print_status(str(busca_input.get())+" foi encontrado em "+str(flen)+ " arquivos, listados à direita. Clique nele para abrir")
+        print_status(str(busca_input.get())+"Was found on "+str(flen)+ " documents\n  Listed on the right. Click on each item on the list to open the document.")
     return found_files_list
 
 
@@ -236,8 +240,9 @@ rel_var="flat"
 button_color="#FF7900"
 text_color="black"
 button_foreground_color="white"
-root.title("Paper Lenses V0.9")
-root.geometry("652x665")
+root.title("Paper Lenses v1.0")
+#root.geometry("652x665")
+root.geometry("542x572")
 
 class ShadowButton(tk.Frame):
 
@@ -251,26 +256,26 @@ class ShadowButton(tk.Frame):
     
 # input
 busca_input_string = tk.StringVar()
-busca_input_string.set('2. Palavras chave (ex: inglês, cisco)')
+busca_input_string.set('Keywords to search (ex: cisco,english)')
 
-status_string = """
-Bem vinda(o) ao Paper Lenses!
-1. Importe arquivos .docx ou .pdf, 
-2. Digite uma ou mais palavras (separadas com vírgula) 
-3. Clique em buscar para filtrar.
-4. Salve os arquivos encontrados.
+status_string ="""
+Welcome to Paper Lenses!
+1. Select a folder containing all .pdf or .docx (you can do this multiple times)
+2. Type words to be searched (multiple search is possible with a comma)
+3. Click in Search to filter
+4. Save all the found documents on a chosen directory.
 """
 
 
 #clear input
 def clear_busca_input_on_click():
-    if busca_input.get() == '2. Palavras chave (ex: inglês, cisco)':
+    if busca_input.get() == 'Keywords to search (ex: cisco,english)':
         busca_input.delete('0', 'end')
 
 
 
-bfont = Font(family='"Helvetica Neue"', size=15)
-cfont = Font(family='"Helvetica Neue"', size=13)
+bfont = Font(family='"Helvetica Neue"', size=11,weight="bold")
+cfont = Font(family='"Helvetica Neue"', size=10,weight="bold")
 
 #orange logo
 
@@ -280,7 +285,7 @@ print(resource_path)
 #orange_label=tk.Label(root,background=button_color,foreground=button_color)
 #orange_label.grid(row=1,column=1, sticky='nesw',rowspan=4 , padx=5, pady=5,columnspan=4)
 try:
-    orange_image = ImageTk.PhotoImage((Image.open(resource_path("orange.png"))).resize((int(WIDTH/4.6), int(HEIGHT/4.6 )), Image.LANCZOS))
+    orange_image = ImageTk.PhotoImage((Image.open(resource_path("orange.png"))).resize((int(WIDTH/5.6), int(HEIGHT/5.6 )), Image.LANCZOS))
     orange_image_label = tk.Label(image=orange_image)
     orange_image_label.grid(row=1,column=1, sticky='ns',rowspan=4 , padx=5, pady=5,columnspan=4,)
 except:
@@ -296,9 +301,9 @@ found_documents_list_frame.grid_columnconfigure(0,  weight = 10)
 
 # widgets
 status_bar = tk.Label(root, text=status_string,bd=2,highlightthickness = 2, relief=rel_var,foreground=text_color,font=cfont,height=7,width=50)
-dir_btn = tk.Button(root, text ='1. Selecione arquivos .pdf ou .docx', command = lambda:chose_folder(),bd=3,relief=rel_var,background=button_color,foreground=button_foreground_color,font=bfont) 
+dir_btn = tk.Button(root, text ='Select a folder containing .pdf or .docx', command = lambda:chose_folder(),bd=3,relief=rel_var,background=button_color,foreground=button_foreground_color,font=bfont) 
 busca_input = tk.Entry(root, text=busca_input_string,bd=2,highlightthickness = 2, relief=rel_var,foreground=text_color,font=bfont)
-save_found_btn = tk.Button(root, text ='4. Salvar documentos filtrados', command = lambda:save_found(),bd=3,relief=rel_var,background=button_color,foreground=button_foreground_color,font=bfont) 
+save_found_btn = tk.Button(root, text ='Save all filtered documents', command = lambda:save_found(),bd=3,relief=rel_var,background=button_color,foreground=button_foreground_color,font=bfont) 
 
 #scrollbars
 buscas_salvas_scrollbar = tk.Scrollbar(buscas_salvas_frame, orient="vertical",relief=rel_var)
@@ -306,10 +311,10 @@ pdf_list_scrollbar = tk.Scrollbar(pdf_list_frame, orient="vertical",relief=rel_v
 found_documents_list_scrollbar = tk.Scrollbar(found_documents_list_frame, orient="vertical",relief=rel_var)
 
 buscas_salvas_list = tk.Listbox(buscas_salvas_frame,height = 3,yscrollcommand=buscas_salvas_scrollbar.set, relief=rel_var,foreground=text_color,font=bfont)
-search_btn = tk.Button(root,text="3. Buscar!",relief=rel_var,background=button_color,foreground=button_foreground_color,font=bfont)
+search_btn = tk.Button(root,text="Search!",relief=rel_var,background=button_color,foreground=button_foreground_color,font=bfont)
 #
 pdf_list = tk.Listbox(pdf_list_frame,height=10,yscrollcommand=pdf_list_scrollbar.set, relief=rel_var,foreground=text_color,font=bfont,width=25)
-found_pdf_label = tk.Label(root, text='Encontrados na busca:',foreground=text_color,font=bfont)
+found_pdf_label = tk.Label(root, text='Filtered files:',foreground=text_color,font=bfont)
 found_documents_list = tk.Listbox(found_documents_list_frame,yscrollcommand=found_documents_list_scrollbar.set, relief=rel_var,height=10 ,foreground=text_color,font=bfont,width=25)
 
 # placing in grid
@@ -394,7 +399,7 @@ def callback_pdf_list(event):
         index = selection[0]
         data = event.widget.get(index)
         
-        
+        print_status("Opening "+data+"...")
         if data.endswith(".pdf"):
                 open_file(pdf_path,data)
         if data.endswith(".docx"):
@@ -427,7 +432,6 @@ def update_documents_list():
             documents_list.append(file)
             pdf_list.insert(tk.END, file)
 
-print(a)
 def callback_found_documents_list(event):
     global pdf_path
     global docx_path
@@ -438,7 +442,7 @@ def callback_found_documents_list(event):
         
         
          # get .pdf files from dir   
-        
+        print_status("Opening "+data+"...")
         if data.endswith(".pdf"):
                 open_file(pdf_path,data)
         if data.endswith(".docx"):
@@ -471,16 +475,16 @@ def update_found_documents_list(list):
 
 
 
-def Buscar():
+def Buscar(event=None):
     
     global documents_list
     global pdf_path
-    print_status("Procurando em "+str(len(documents_list))+" documentos... por favor espere")
+    print_status("Searching in "+str(len(documents_list))+" documents... please wait")
     global search_strings
     # validation checks
     # split by comma into a list 
     search_strings = busca_input.get().split(',')
-    if "2. Palavras chave (separe com ,)" in search_strings:
+    if "Keywords to search (ex: cisco,english)" in search_strings:
         return
     # remove empty strings
     search_strings = [x for x in search_strings if x != '']
@@ -544,4 +548,5 @@ def exit_handler():
 
 atexit.register(exit_handler)
 search_btn.configure(command=Buscar)
+busca_input.bind('<Return>', Buscar)
 root.mainloop()
